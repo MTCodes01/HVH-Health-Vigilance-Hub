@@ -1,0 +1,4 @@
+UserID,Location,Timestamp, Credibility Score,Outbreak,Temperature,Rainfall,Humidity,RiskIndex,Symptom_Cough,Symptom_Fever,Symptom_Rash
+1.0,London,2024-12-26,0.9,1.0,6.69,0.0,92,323.93684210526317,False,True,False
+2.0,New York,2024-12-26,0.8,0.0,-2.58,0.0,70,-100.33333333333333,True,False,False
+3.0,Mumbai,2024-12-26,0.7,1.0,25.99,0.0,53,810.2764705882354,False,False,True

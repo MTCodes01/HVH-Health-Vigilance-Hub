@@ -1,0 +1,7 @@
+UserID,Symptom,Location,Timestamp, Credibility Score,Outbreak
+1,Fever,London,12/1/2023 14:00,0.9,1
+2,Cough,New York,12/1/2023 15:00,0.8,0
+3,Rash,Mumbai,12/2/2023 10:00,0.7,1
+
+,,,,,
+
