@@ -124,3 +124,4 @@ def query(request):
             return JsonResponse({"error": "An error occurred while saving the query data."}, status=500)
         return JsonResponse({"success": "Query submitted successfully"}, status=200)
     return render(request, 'query.html')
+  
