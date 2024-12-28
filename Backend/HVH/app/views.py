@@ -32,6 +32,24 @@ def forgot(request):
 # def query(request):
 #     return render(request, 'query.html')
 
+def babyVaccination(request):
+    return render(request, 'baby_vaccine.html')
+
+def generalVaccination(request):
+    return render(request, 'general_vaccine.html')
+
+def profile(request):
+    return render(request, 'profile.html')
+
+def precaution(request):
+    return render(request, 'precaution.html')
+
+def virtualMeet(request):
+    return render(request, 'virtual_meet.html')
+
+def ticket(request):
+    return render(request, 'opTicket.html')
+
 # Authentication_______________________________________
 
 # @csrf_exempt
