@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVH</title>
+    <style>
+        body {
+            font-family: Poppins, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #9fc5eb;
+        }
+        header {
+            background:#9fc5eb;
+            color:black;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 0 10px;
+        }
+        nav ul li a {
+            color:black;
+            text-decoration: none;
+            font-weight: medium;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        .hero {
+            text-align: center;
+            padding: 50px 20px;
+            background: url('bg.png');
+            background-position: center;
+            color:white
+        }
+        .hero h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: black;
+        }
+        .hero p {
+            font-size: 1.2em;
+            color:rgb(255, 255, 255);
+        }
+
+        .hero button {
+            position: relative;
+            width:20%;
+            height: 5vh;
+            padding:2px;
+            background-color: #deea74;
+            border: none;
+            font-weight: 500;
+             font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-colour 0.3s;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+        }
+        .feature {
+            background:white ;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(97, 93, 93, 0.1);
+            margin: 15px;
+            padding: 20px;
+            max-width: 300px;
+            text-align: center;
+        }
+        .feature img {
+            width: 100px;
+            margin-bottom: 15px;
+        }
+        .feature h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        footer {
+            background: rgb(194, 193, 193);
+            background:white;
+            color: #550d2d;
+            text-align: center;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Health Vigilance Hub</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="https://www.google.com/maps/search/doctors+near+me/@11.3098605,75.9347108,14z/data=!3m1!4b1?entry=ttu&g_ep=EgoyMDI0MTIxMS4wIKXMDSoASAFQAw%3D%3D">Doctor Near me </a></li>
+                <li><a href="login.html">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <h1>WELCOME</h1>
+        <p>A predictive outbreak alert system to safeguard communities through data-driven insights and gamification.</p>
+        <button type="submit">REPORT SYMPTOMS</button>
+    </section>
+
+    <section class="features" id="features">
+        <div class="feature">
+            <img src="https://i.pinimg.com/736x/35/c1/14/35c11477d386737c8890f6cc0c0cd2d7.jpg" alt="Risk Maps" >
+            
+            <h3>Localized Risk Maps</h3>
+            <p>View interactive heatmaps of outbreak trends in your area.</p>
+        </div>
+        <div class="feature">
+            <img src="https://i.pinimg.com/736x/71/10/03/711003a0ecb383a0b1f4207606b589c3.jpg" alt="Gamification">
+            <h3>Leaderboard</h3>
+            <p>Earn badges and rewards for contributing reliable reports.</p>
+        </div>
+        <div class="feature">
+            <img src="https://i.pinimg.com/736x/17/42/b8/1742b81636580504020c93cf1f77decc.jpg" alt="Offline Access">
+            <h3>Offline Access</h3>
+            <p>Submit reports even in areas with limited connectivity.</p>
+        </div>
+        <div class="feature">
+            <img src="https://i.pinimg.com/736x/b4/e4/77/b4e477617a0d53a128e80839d79f0960.jpg" alt="Community Alerts">
+            <h3>Community Alerts</h3>
+            <p>Receive real-time updates and public health guidance.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 HVH Platform. All rights reserved.</p>
+    </footer>
+</body>
+</html>
