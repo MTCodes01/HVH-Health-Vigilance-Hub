@@ -1,53 +1,65 @@
+import joblib
 import folium
-import pandas as pd
 from folium.plugins import HeatMap
-from prophet import Prophet
+import numpy as np
+from weathercsv import fetch_weather_for_location
 
-# Load the CSV data, assuming it contains columns: 'date', 'location', 'disease', 'latitude', 'longitude', 'cases'
-data = pd.read_csv("time_series_disease_data.csv")
+# Symptom-to-disease mapping
+SYMPTOM_DISEASE_MAP = {
+    "fever": ["Dengue", "Malaria", "Flu", "Covid"],
+    "cough": ["Covid", "Flu"],
+    "rash": ["Dengue", "Measles"],
+    "chills": ["Malaria"],
+}
 
-# Filter data for a specific location and disease
-location = 1  # Example location ID
-disease = "Flu"  # Example disease
-filtered_data = data[(data["location"] == location) & (data["disease"] == disease)]
+# Load the trained model
+model = joblib.load("disease_predictor_model.pkl")
 
-# Prepare data for Prophet
-prophet_data = filtered_data[["date", "cases"]].copy()  # Make a copy to avoid SettingWithCopyWarning
-prophet_data.rename(columns={"date": "ds", "cases": "y"}, inplace=True)
+# Function to predict disease
+def predict_disease(temp, humidity, density, lat, lon, rainfall, symptoms):
+    possible_diseases = set()
+    for symptom in symptoms:
+        possible_diseases.update(SYMPTOM_DISEASE_MAP.get(symptom.lower(), []))
 
-# Train the Prophet model
-model = Prophet()
-model.fit(prophet_data)
+    input_data = np.array([[temp, humidity, density, lat, lon, rainfall]])
+    prediction = model.predict(input_data)
+    disease_mapping = {index: category for index, category in enumerate(['Dengue', 'Malaria', 'Flu', 'Covid'])}
+    predicted_disease = disease_mapping[prediction[0]]
 
-# Forecast future cases (e.g., predict for 30 days)
-future = model.make_future_dataframe(periods=30)
-forecast = model.predict(future)
+    if predicted_disease in possible_diseases:
+        return predicted_disease
+    return "Unknown"
 
-# Create a DataFrame with the forecasted values
-forecast_data = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
+# Function to generate heatmap
+def generate_heatmap(location, predicted_disease, estimated_days):
+    m = folium.Map(location=location, zoom_start=10)
+    for day in range(1, estimated_days + 1):
+        radius = day * 10  # Increase radius per day
+        HeatMap([[location[0], location[1], radius]]).add_to(m)
+    heatmap_file = f"heatmap_{predicted_disease}.html"
+    m.save(heatmap_file)
+    print(f"Heatmap saved as {heatmap_file}")
 
-# Now, extract the forecasted cases along with latitude and longitude from the original data
-locations = filtered_data[['latitude', 'longitude']].copy()
-locations['forecasted_cases'] = forecast['yhat'][:len(locations)]  # Add forecasted cases for each location
+# Main Function
+def main():
+    # User Inputs
+    symptoms = input("Enter symptoms (comma-separated, e.g., fever,cough): ").split(",")
+    lat = float(input("Enter latitude: "))
+    lon = float(input("Enter longitude: "))
+    estimated_days = int(input("Enter estimated days for spread: "))
 
-# Create a folium map centered around a specific location
-map_center = [40.137700857991874, -85.67509607538854]  # Center of the US, or you can use the mean of the latitudes/longitudes
-m = folium.Map(
-    location=map_center,  # Center map
-    zoom_start=4,  # Initial zoom level
-    control_scale=True,
-    zoom_control=False,  # Disable zoom controls
-    scrollWheelZoom=False,  # Disable scroll wheel zoom
-    dragging=True,  # Enable map dragging
-    min_zoom=4,
-    max_zoom=4 
-)
+    # Fetch weather data
+    weather_data = fetch_weather_for_location(lat, lon, "3443df9e6a3d2df4ae5a38bca00b7619")
+    if not weather_data:
+        print("Failed to fetch weather data.")
+        return
 
-# Prepare heatmap data (latitude, longitude, forecasted cases)
-heat_data = locations[['latitude', 'longitude', 'forecasted_cases']].values.tolist()
+    density = 5000  # Placeholder for population density; replace with actual data or logic
+    predicted_disease = predict_disease(
+        weather_data['Temperature'], weather_data['Humidity'], density, lat, lon, weather_data['Rainfall'], symptoms
+    )
+    print(f"Predicted Disease: {predicted_disease}")
+    generate_heatmap([lat, lon], predicted_disease, estimated_days)
 
-# Add HeatMap to the map
-HeatMap(heat_data).add_to(m)
-
-# Save the map to an HTML file
-m.save("heatmap.html")
+if __name__ == "__main__":
+    main()
