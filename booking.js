@@ -46,9 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function startDateCheck() {
-        // Check for due vaccinations every minute
         setInterval(checkScheduledVaccinations, 60000);
-        // Also check immediately on load
         checkScheduledVaccinations();
     }
 
@@ -62,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const scheduledDate = new Date(vaccineStatus.scheduledDate);
                 const vaccineItem = checkbox.closest('.vaccine-item');
                 
-                // Enable checkbox if scheduled date has passed
                 if (scheduledDate <= currentDate) {
                     checkbox.disabled = false;
                     vaccineItem.style.backgroundColor = '#e8f5e9';
@@ -79,18 +76,37 @@ document.addEventListener('DOMContentLoaded', function() {
             const savedStatus = JSON.parse(localStorage.getItem('vaccinationStatus')) || {};
             const vaccineStatus = savedStatus[checkbox.id];
             
+            // If not scheduled, prompt for completion date
             if (!vaccineStatus?.scheduledDate) {
-                e.preventDefault();
-                checkbox.checked = false;
-                alert('Please schedule this vaccination first.');
+                const completionDate = prompt('Please enter the completion date (YYYY-MM-DD):');
+                if (!completionDate) {
+                    checkbox.checked = false;
+                    return;
+                }
+                
+                const enteredDate = new Date(completionDate);
+                if (isNaN(enteredDate.getTime())) {
+                    alert('Please enter a valid date in YYYY-MM-DD format');
+                    checkbox.checked = false;
+                    return;
+                }
+
+                const currentDate = new Date();
+                if (enteredDate > currentDate) {
+                    alert('Completion date cannot be in the future');
+                    checkbox.checked = false;
+                    return;
+                }
+
+                markVaccine(checkbox, enteredDate.toISOString());
                 return;
             }
 
+            // For scheduled vaccines, check the scheduled date
             const scheduledDate = new Date(vaccineStatus.scheduledDate);
             const currentDate = new Date();
             
             if (scheduledDate > currentDate) {
-                e.preventDefault();
                 checkbox.checked = false;
                 alert(`This vaccination cannot be marked as complete until ${scheduledDate.toLocaleDateString()}`);
                 return;
@@ -191,10 +207,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const scheduledDate = document.getElementById('appointmentDate').value;
 
         if (vaccineId && scheduledDate) {
-            // Validate that scheduled date is not in the past
             const selectedDate = new Date(scheduledDate);
             const currentDate = new Date();
-            currentDate.setHours(0, 0, 0, 0); // Reset time part for proper date comparison
+            currentDate.setHours(0, 0, 0, 0);
 
             if (selectedDate < currentDate) {
                 alert('Please select a future date for the vaccination.');
