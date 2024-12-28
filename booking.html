@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child Vaccination Tracker</title>
+    <link rel="stylesheet" href="booking.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Child Vaccination Tracker</h1>
+        
+        <!-- Vaccination Progress Bar -->
+        <div class="progress-container">
+            <h2>Overall Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-text"></div>
+        </div>
+
+        <!-- Vaccination Schedule -->
+        <div class="vaccine-tracker">
+            <h2>Vaccination Schedule</h2>
+            <div class="vaccine-groups">
+                <div class="vaccine-group">
+                    <h3>Birth to 2 Months</h3>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="hepb1" class="vaccine-checkbox">
+                        <label for="hepb1">Hepatitis B (1st dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="bcg" class="vaccine-checkbox">
+                        <label for="bcg">BCG</label>
+                        <span class="date-completed"></span>
+                    </div>
+                </div>
+
+                <div class="vaccine-group">
+                    <h3>2 Months</h3>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="dtap1" class="vaccine-checkbox">
+                        <label for="dtap1">DTaP (1st dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="ipv1" class="vaccine-checkbox">
+                        <label for="ipv1">IPV (1st dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="hib1" class="vaccine-checkbox">
+                        <label for="hib1">Hib (1st dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                </div>
+
+                <div class="vaccine-group">
+                    <h3>4 Months</h3>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="dtap2" class="vaccine-checkbox">
+                        <label for="dtap2">DTaP (2nd dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="ipv2" class="vaccine-checkbox">
+                        <label for="ipv2">IPV (2nd dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                </div>
+
+                <div class="vaccine-group">
+                    <h3>6 Months</h3>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="hepb2" class="vaccine-checkbox">
+                        <label for="hepb2">Hepatitis B (2nd dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                    <div class="vaccine-item">
+                        <input type="checkbox" id="dtap3" class="vaccine-checkbox">
+                        <label for="dtap3">DTaP (3rd dose)</label>
+                        <span class="date-completed"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Vaccination Form -->
+        <div class="next-vaccination">
+            <h2>Schedule Next Vaccination</h2>
+            <form id="vaccinationForm">
+                <div class="form-group">
+                    <label for="childName">Child's Name:</label>
+                    <input type="text" id="childName" required>
+                </div>
+                <div class="form-group">
+                    <label for="nextVaccine">Select Vaccine:</label>
+                    <select id="nextVaccine" required>
+                        <option value="">Choose vaccine...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDate">Preferred Date:</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                <button type="submit">Schedule</button>
+            </form>
+        </div>
+    </div>
+    <script src="booking.js"></script>
+</body>
+</html>
