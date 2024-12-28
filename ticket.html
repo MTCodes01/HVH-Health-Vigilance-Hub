@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital OP Ticket System</title>
+    <link rel="stylesheet" href="ticket.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Hospital OP Ticket System</h1>
+        <form id="ticketForm">
+            <div class="section-header">Appointment Details</div>
+            <div class="form-group">
+                <label for="hospital">Select Hospital</label>
+                <select id="hospital" required>
+                    <option value="">Select hospital</option>
+                    <option value="city-general">City General Hospital</option>
+                    <option value="apollo">Apollo Hospital</option>
+                    <option value="fortis">Fortis Hospital</option>
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <label for="preferredDate">Preferred Date</label>
+                <input type="date" id="preferredDate" required>
+            </div>
+
+            <div id="availabilitySection" class="availability">
+                <label>Available Time Slots:</label>
+                <div id="timeSlots"></div>
+            </div>
+
+            <div class="section-header">Personal Information</div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" required>
+                            <option value="">Select gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" required></textarea>
+            </div>
+
+            <div class="section-header">Medical Information</div>
+            <div class="form-group">
+                <label for="symptoms">Current Symptoms</label>
+                <textarea id="symptoms" required placeholder="Describe your current symptoms in detail"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Visit Type</label>
+                
+            </div>
+
+            <div class="form-group">
+                <label for="previousHistory">Previous Medical History</label>
+                <textarea id="previousHistory" placeholder="List any previous medical conditions, surgeries, or ongoing treatments"></textarea>
+            </div>
+
+           
+            </div>
+
+            
+
+            
+
+            
+
+            <div class="button-container">
+                <button type="submit">Generate OP Ticket</button>
+            </div>
+        </form>
+
+        <div id="ticketPreview">
+            <h2>OP Ticket Preview</h2>
+            <div id="ticketContent"></div>
+        </div>
+    </div>
+    <script src="ticket.js"></script>
+</body>
+</html>
