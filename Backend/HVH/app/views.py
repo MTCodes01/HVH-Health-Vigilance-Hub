@@ -7,3 +7,6 @@ def index(request):
 def home(request):
     # return render(request, 'index.html')
     return JsonResponse({"success": "success"}, status=200)
+
+def login(request):
+    return render(request, 'login.html')
