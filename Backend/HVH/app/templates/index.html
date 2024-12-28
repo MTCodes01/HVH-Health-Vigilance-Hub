@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loader</title>
+    <style>
+      :root {
+        --color: #0088cc;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f0f0f0;
+      }
+
+      svg {
+        width: 100px;
+        height: 100px;
+      }
+
+      .dot {
+        stroke: #fff;
+        stroke-width: 2px;
+        transform-origin: center;
+        opacity: 0;
+        r: 10;
+        cy: 50%;
+        fill: var(--color);
+        filter: saturate(2) opacity(0.85);
+        animation: loader 3s ease-in-out infinite;
+      }
+
+      .dot:nth-child(1) {
+        animation-delay: 0s;
+      }
+
+      .dot:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      .dot:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      .dot:nth-child(4) {
+        animation-delay: 0.45s;
+      }
+
+      .dot:nth-child(5) {
+        animation-delay: 0.6s;
+      }
+
+      @keyframes loader {
+        0%,
+        100% {
+          opacity: 0;
+          transform: scale(1);
+        }
+
+        45%,
+        65% {
+          opacity: 1;
+          transform: scale(0.7);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg xmlns="http://www.w3.org/2000/svg">
+      <g>
+        <circle class="dot" cx="20" cy="50" r="10" />
+        <circle class="dot" cx="40" cy="50" r="10" />
+        <circle class="dot" cx="60" cy="50" r="10" />
+        <circle class="dot" cx="80" cy="50" r="10" />
+        <circle class="dot" cx="100" cy="50" r="10" />
+      </g>
+    </svg>
+    <script>
+      setTimeout(() => {
+        window.location.href = "http://localhost:5000/login";
+      }, 3000);
+    </script>
+  </body>
+</html>
