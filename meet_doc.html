@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>meet doctor virtually</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    header {
+      background-color: #6196cb;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #6196cb;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #6196cb;
+    }
+
+    .success {
+      color: green;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Meet doctor virtually</h1>
+  </header>
+  <div class="container">
+    <form id="bookingForm">
+      <div class="form-group">
+        <label for="doctor">Choose department:</label>
+        <select id="doctor" name="doctor" required>
+          <option value="">Select department</option>
+          <option value="Dr. Smith">--</option>
+          <option value="Dr. Brown">--</option>
+          <option value="Dr. Lee">--</option>
+         
+          <option value="Dr. Smith">--</option>
+          <option value="Dr. Brown">--</option>
+          <option value="Dr. Lee">--</option>
+        </select>
+      </div>
+    <div class="container">
+    <form id="bookingForm">
+      <div class="form-group">
+        <label for="doctor">Choose  Doctor:</label>
+        <select id="doctor" name="doctor" required>
+          <option value="">Select  Doctor</option>
+          <option value="Dr. Smith">--</option>
+          <option value="Dr. Brown">--</option>
+          <option value="Dr. Lee">--</option>
+         
+          <option value="Dr. Smith">--</option>
+          <option value="Dr. Brown">--</option>
+          <option value="Dr. Lee">--</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Appointment Date:</label>
+        <input type="date" id="date" name="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="time">Appointment Time:</label>
+        <input type="time" id="time" name="time" required>
+      </div>
+
+      <div class="form-group">
+        <label>Consultation Type:</label>
+        <input type="radio" id="meet" name="consultation" value="Meet in Person" required>
+        <label for="meet">meet consultation</label><br>
+        <input type="radio" id="phone" name="consultation" value="Phone Consultation">
+        <label for="phone">Phone Consultation</label>
+      </div>
+
+      <button type="submit">Book Appointment</button>
+      <div id="successMessage" class="success" style="display: none;">Appointment booked successfully!</div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('bookingForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form from refreshing the page
+
+      const doctor = document.getElementById('doctor').value;
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      const consultation = document.querySelector('input[name="consultation"]:checked').value;
+
+      if (doctor && date && time && consultation) {
+        document.getElementById('successMessage').style.display = 'block';
+        console.log(`Appointment Details:\nDoctor: ${doctor}\nDate: ${date}\nTime: ${time}\nConsultation Type: ${consultation}`);
+
+        // Clear the form
+        document.getElementById('bookingForm').reset();
+      }
+    });
+  </script>
+</body>
+</html>
