@@ -1,103 +1,120 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next Vaccine Details</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f3f4f6;
-            color: #333;
-        }
 
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        .vaccine-section {
-            margin-bottom: 20px;
-        }
-
-        .vaccine-section label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-            color: #34495e;
-        }
-
-        .vaccine-section input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .action-buttons {
-            text-align: center;
-        }
-
-        .action-buttons button {
-            background-color: #6196cb;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .action-buttons button:hover {
-            background-color: #1642a0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Vaccine Details</h1>
-
-        <div class="vaccine-section">
-            <form id="vaccineForm">
-                <label for="vaccineName">Vaccine Name:</label>
-                <input type="text" id="vaccineName" name="vaccineName" placeholder="Enter vaccine name" required>
-
-                <label for="date">Date:</label>
-                <input type="date" id="date" name="date" required>
-
-                <label for="hospital">Hospital:</label>
-                <input type="text" id="hospital" name="hospital" placeholder="Enter hospital name" required>
-
-                <div class="action-buttons">
-                    <button type="submit">Book My Slot</button>
+           
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Next Vaccine Details</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f3f4f6;
+                    color: #333;
+                }
+        
+                .container {
+                    max-width: 800px;
+                    margin: 50px auto;
+                    padding: 20px;
+                    background-color: #fff;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+        
+                h1 {
+                    text-align: center;
+                    color: #2c3e50;
+                }
+        
+                .vaccine-section {
+                    margin-bottom: 20px;
+                }
+        
+                .vaccine-section label {
+                    display: block;
+                    margin: 10px 0 5px;
+                    font-weight: bold;
+                    color: #34495e;
+                }
+        
+                .vaccine-section input, .vaccine-section select {
+                    width: calc(100% - 20px);
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    font-size: 16px;
+                }
+        
+                .action-buttons {
+                    text-align: center;
+                }
+        
+                .action-buttons button {
+                    background-color: #6196cb;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    margin: 10px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }
+        
+                .action-buttons button:hover {
+                    background-color: #1642a0;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Vaccine Details</h1>
+        
+                <div class="vaccine-section">
+                    <form id="vaccineForm">
+                        <label for="vaccineName">Vaccine Name:</label>
+                        <select id="vaccineName" name="vaccineName" required>
+                            <option value="">Select a vaccine</option>
+                            <option value="Pfizer">rotavirus</option>
+                            <option value="Moderna">RSV(respiratory syncytial virus)</option>
+                            <option value="Johnson & Johnson">tetanus</option>
+                            <option value="AstraZeneca">rubella</option>
+                            
+                            <option value="Pfizer">hepatitis A</option>
+                            <option value="Moderna">hepatitis B</option>
+                            <option value="Johnson & Johnson">IDRV</option>
+                            <option value="AstraZeneca">Mpox</option>
+                        </select>
+        
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" name="date" required>
+        
+                        <label for="hospital">Hospital:</label>
+                        <input type="text" id="hospital" name="hospital" placeholder="Enter hospital name" required>
+        
+                       
+        
+                        <div class="action-buttons">
+                            <button type="submit">Book My Slot</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        document.getElementById('vaccineForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form submission
-            const vaccineName = document.getElementById('vaccineName').value;
-            const date = document.getElementById('date').value;
-            const hospital = document.getElementById('hospital').value;
-
-            alert(`Slot booked successfully!\n\nVaccine: ${vaccineName}\nDate: ${date}\nHospital: ${hospital}`);
-        });
-    </script>
-</body>
-</html>
+            </div>
+        
+            <script>
+                document.getElementById('vaccineForm').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent form submission
+                    const vaccineName = document.getElementById('vaccineName').value;
+                    const date = document.getElementById('date').value;
+                    const hospital = document.getElementById('hospital').value;
+                    const nextSlot = document.getElementById('nextSlot').value;
+        
+                    alert(`Slot booked successfully!\n\nVaccine: ${vaccineName}\nDate: ${date}\nHospital: ${hospital}\nNext Slot Date: ${nextSlot}`);
+                });
+            </script>
+        </body>
+        </html>
+        
