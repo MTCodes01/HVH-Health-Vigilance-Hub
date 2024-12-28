@@ -82,7 +82,12 @@
     </svg>
     <script>
       setTimeout(() => {
-        window.location.href = "http://localhost:5000/login";
+        // localStorage conditions
+        if (localStorage.getItem("LOGGED_IN") === "true") {
+          window.location.href = "home/";
+        } else {
+          window.location.href = "login/";
+        }
       }, 3000);
     </script>
   </body>
