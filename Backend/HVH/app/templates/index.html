@@ -83,7 +83,8 @@
     <script>
       setTimeout(() => {
         // localStorage conditions
-        if (localStorage.getItem("LOGGED_IN") === "true") {
+
+        if (localStorage.getItem('LOGGED_IN') === "true") {
           window.location.href = "home/";
         } else {
           window.location.href = "login/";

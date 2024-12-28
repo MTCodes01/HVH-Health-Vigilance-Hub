@@ -1,6 +1,14 @@
 let currentQuestion = 1;
 const totalQuestions = 5;
 
+if (localStorage.getItem('QUERY_SUBMITTED')) {
+    if (localStorage.getItem('LOGGED_IN')) {
+        window.location.href = '/home/';
+    } else {
+        window.location.href = '/login/';
+    }
+}
+
 function nextQuestion(current) {
     // Validate current question before moving to next
     if (current === 1) {
@@ -111,7 +119,7 @@ function selectLocation(location) {
     document.getElementById("location-suggestions").style.display = "none";
 }
 
-function submitForm() {
+async function submitForm() {
     // Validate emergency contact information
     const emergencyName = document.getElementById("emergency-name").value;
     const emergencyPhone = document.getElementById("emergency-phone").value;
@@ -135,6 +143,7 @@ function submitForm() {
     
     // Here you would typically send the data to your backend
     const formData = {
+        username: localStorage.getItem('USERNAME'),
         firstName: document.getElementById("first-name").value,
         lastName: document.getElementById("last-name").value,
         age: document.getElementById("age").value,
@@ -149,5 +158,31 @@ function submitForm() {
         }
     };
 
+    // Send the form data to your backend
+    const response = await fetch('/query/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken() // Include CSRF token
+        },
+        body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        console.log(result);
+        localStorage.setItem('QUERY_SUBMITTED', 'true');
+        setTimeout(() => {
+            window.location.href = '/home/';
+        }, 3000);
+    } else {
+        alert(result.error || 'An error occurred.');
+    }
+
     console.log("Form Data:", formData);
+}
+
+function getCSRFToken() {
+    return document.cookie.split('; ').find(row => row.startsWith('csrftoken=')).split('=')[1];
 }

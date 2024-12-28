@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Information Form</title>
     <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="query.css">
+    <link rel="stylesheet" href="{% static 'query.css' %}">
 </head>
 <body>
     <div class="query-container">
@@ -113,9 +114,8 @@
         </div>
         <h1 class="thank-you-title">Thank You!</h1>
         <p>Your information has been successfully submitted!</p>
-        <button class="btn" onclick="window.location.href='/'">Go to Home</button>
     </div>
 
-    <script src="query.js"></script>
+    <script src="{% static 'query.js' %}"></script>
 </body>
 </html>
