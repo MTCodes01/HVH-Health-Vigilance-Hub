@@ -136,3 +136,4 @@ function handleFormSubmit(e) {
     const selectedConditions = Array.from(document.querySelectorAll('input[name="conditions"]:checked'))
         .map(checkbox => checkbox.value)
         .join(', ');
+}
