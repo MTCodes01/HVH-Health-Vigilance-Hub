@@ -19,7 +19,7 @@ Whether it’s booking doctor appointments, storing your health records, or gett
 📅 Customize the timeframe (*x*) to see patterns in disease transmission and take preventive measures.  
 🚨 A game-changer for public health authorities, researchers, and individuals alike!  
 
----
+
 
 ### 2. **Healthcare Services**  
 - **OP Ticket Booking for Government Hospitals:**  
@@ -34,7 +34,7 @@ Whether it’s booking doctor appointments, storing your health records, or gett
 - **Meet a Doctor Online:**  
   Too busy to visit the clinic? Consult with doctors virtually and get the care you need from anywhere.  
 
----
+
 
 ### 3. **Health Management Tools**  
 - **Personal Health Record Keeping:**  
@@ -43,7 +43,7 @@ Whether it’s booking doctor appointments, storing your health records, or gett
 - **Vaccination Card Management:**  
   Parents, rejoice! Track your child’s vaccination schedule with digital reminders, ensuring they never miss an important shot.  
 
----
+
 
 ### 4. **Community Alerts and Precautions**  
 - Stay informed with real-time, location-based alerts about ongoing outbreaks.  
