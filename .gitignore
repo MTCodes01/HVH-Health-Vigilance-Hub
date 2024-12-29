@@ -8,4 +8,3 @@ db.sqlite3-journal
 
 # Python stuff:
 __pycache__/
-__init__.py
