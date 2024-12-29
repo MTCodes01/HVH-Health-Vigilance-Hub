@@ -3,6 +3,7 @@ import folium
 from folium.plugins import HeatMap
 import numpy as np
 from weathercsv import fetch_weather_for_location
+from folium.plugins import Search
 
 # Symptom-to-disease mapping
 SYMPTOM_DISEASE_MAP = {
@@ -41,22 +42,77 @@ def predict_disease_and_spread(temp, humidity, density, lat, lon, rainfall, symp
     return predicted_disease, disease_spread
 
 # Function to generate heatmap based on prediction probabilities
+
+
+# Function to generate heatmap based on prediction probabilities# Function to generate heatmap with calendar and search bar
 def generate_heatmap(location, predicted_disease, spread_data, estimated_days):
     m = folium.Map(location=location, zoom_start=10)
     
+    # Create a FeatureGroup to hold markers
+    feature_group = folium.FeatureGroup(name="Searchable Locations")
+    
+    # Add a marker for the input location
+    folium.Marker(
+        location=location,
+        popup=f"Predicted Disease: {predicted_disease}",
+        tooltip="Click for more info"
+    ).add_to(feature_group)
+    
+    # Add FeatureGroup to the map
+    feature_group.add_to(m)
+    
+    # Add search functionality
+    search = Search(layer=feature_group, placeholder="Search for a location", search_label="name", collapsed=False)
+    m.add_child(search)
+    
     # Generate heatmap points based on spread probabilities
     for day in range(1, estimated_days + 1):
-        weight_factor = day / estimated_days  # Adjust weight over time
+        weight_factor = day / estimated_days
         points = [
-            [location[0] + np.random.uniform(-0.01, 0.01),  # Slight random variation in latitude
-             location[1] + np.random.uniform(-0.01, 0.01),  # Slight random variation in longitude
+            [location[0] + np.random.uniform(-0.01, 0.01),
+             location[1] + np.random.uniform(-0.01, 0.01),
              spread_data[predicted_disease] * weight_factor]
         ]
         HeatMap(points, radius=15, blur=10).add_to(m)
 
+    # Add calendar functionality to the map
+    calendar_code = """
+        <style>
+            #calendar {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 1000;
+                background: white;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+            #calendar input {
+                width: 200px;
+                padding: 5px;
+                margin: 5px 0;
+                font-size: 14px;
+            }
+        </style>
+        <div id="calendar">
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date">
+        </div>
+        <script>
+            document.getElementById('date').addEventListener('change', function() {
+                alert('Selected date: ' + this.value); // Add dynamic functionality here
+            });
+        </script>
+    """
+    m.get_root().html.add_child(folium.Element(calendar_code))
+    
     heatmap_file = f"heatmap_{predicted_disease}.html"
     m.save(heatmap_file)
     print(f"Heatmap saved as {heatmap_file}")
+
+
 
 # Main Function
 def main():
