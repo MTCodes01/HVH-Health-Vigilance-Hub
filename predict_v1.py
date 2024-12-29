@@ -66,13 +66,15 @@ def main():
     lon = float(input("Enter longitude: "))
     estimated_days = int(input("Enter estimated days for spread: "))
 
-    # Fetch weather data
-    weather_data = fetch_weather_for_location(lat, lon, "3443df9e6a3d2df4ae5a38bca00b7619")
+    # Fetch weather data (including population density)
+    weather_data = fetch_weather_for_location(lat, lon, "3443df9e6a3d2df4ae5a38bca00b7619", "urban_xtreme")
+
     if not weather_data:
         print("Failed to fetch weather data.")
         return
 
-    density = 5000  # Placeholder for population density; replace with actual data or logic
+    # Extract population density from weather_data
+    density = weather_data['Population Density']
 
     # Predict disease and spread data
     predicted_disease, spread_data = predict_disease_and_spread(
