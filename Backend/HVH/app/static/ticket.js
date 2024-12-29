@@ -1,139 +1,208 @@
-// Hospital departments data
-const departments = {
-    'city-general': ['General Medicine', 'Cardiology', 'Orthopedics', 'Pediatrics'],
-    'apollo': ['General Medicine', 'Neurology', 'Dermatology', 'ENT'],
-    'fortis': ['General Medicine', 'Oncology', 'Gynecology', 'Psychiatry']
-};
-
-// Doctors data
-const doctors = {
-    'general-medicine': ['Dr. John Smith', 'Dr. Sarah Johnson', 'Dr. Michael Brown'],
-    'cardiology': ['Dr. Robert Wilson', 'Dr. Emily Davis'],
-    'orthopedics': ['Dr. James Anderson', 'Dr. Lisa Taylor'],
-    'pediatrics': ['Dr. David Miller', 'Dr. Jennifer White'],
-    'neurology': ['Dr. Richard Lee', 'Dr. Mary Clark'],
-    'dermatology': ['Dr. Thomas Moore', 'Dr. Patricia Hall'],
-    'ent': ['Dr. Charles Wilson', 'Dr. Elizabeth Martin'],
-    'oncology': ['Dr. William Turner', 'Dr. Susan Adams'],
-    'gynecology': ['Dr. Karen Lewis', 'Dr. Margaret Wright'],
-    'psychiatry': ['Dr. Joseph Baker', 'Dr. Nancy Green']
-};
-
-// Event Listeners
-document.getElementById('hospital').addEventListener('change', updateDepartments);
-document.getElementById('department').addEventListener('change', updateDoctors);
-document.getElementById('preferredDate').addEventListener('change', checkAvailability);
-document.getElementById('ticketForm').addEventListener('submit', handleFormSubmit);
-
-// Update departments based on selected hospital
-function updateDepartments() {
-    const hospitalSelect = document.getElementById('hospital');
-    const departmentSelect = document.getElementById('department');
-    const selectedHospital = hospitalSelect.value;
-
-    departmentSelect.innerHTML = '<option value="">Select department</option>';
-
-    if (selectedHospital) {
-        departments[selectedHospital].forEach(dept => {
-            const option = document.createElement('option');
-            option.value = dept.toLowerCase().replace(' ', '-');
-            option.textContent = dept;
-            departmentSelect.appendChild(option);
-        });
-    }
-}
-
-// Update doctors based on selected department
-function updateDoctors() {
-    const departmentSelect = document.getElementById('department');
-    const doctorSelect = document.getElementById('doctor');
-    const selectedDepartment = departmentSelect.value;
-
-    doctorSelect.innerHTML = '<option value="">Select doctor</option>';
-
-    if (selectedDepartment && doctors[selectedDepartment]) {
-        doctors[selectedDepartment].forEach(doc => {
-            const option = document.createElement('option');
-            option.value = doc.toLowerCase().replace(' ', '-');
-            option.textContent = doc;
-            doctorSelect.appendChild(option);
-        });
-    }
-}
-
-// Generate time slots
-function generateTimeSlots() {
-    const slots = [];
-    for (let hour = 9; hour <= 16; hour++) {
-        slots.push(`${hour}:00`);
-        slots.push(`${hour}:30`);
-    }
-    return slots;
-}
-
-// Check availability and show time slots
-function checkAvailability() {
-    const hospital = document.getElementById('hospital').value;
-    const department = document.getElementById('department').value;
-    const date = document.getElementById('preferredDate').value;
-
-    if (hospital && department && date) {
-        const availabilitySection = document.getElementById('availabilitySection');
-        const timeSlotsDiv = document.getElementById('timeSlots');
-        availabilitySection.style.display = 'block';
-        timeSlotsDiv.innerHTML = '';
-
-        const timeSlots = generateTimeSlots();
-        timeSlots.forEach(slot => {
-            const slotDiv = document.createElement('div');
-            slotDiv.className = 'time-slot';
-            slotDiv.textContent = slot;
-            slotDiv.onclick = function() {
-                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-                this.classList.add('selected');
-            };
-            timeSlotsDiv.appendChild(slotDiv);
-        });
-    }
-}
-
-// Generate unique ticket number
-function generateTicketNumber() {
-    const prefix = 'OP';
-    const timestamp = new Date().getTime().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `${prefix}-${timestamp}-${random}`;
-}
-
-// Handle form submission
-function handleFormSubmit(e) {
-    e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    // Load stored form data
+    const formData = JSON.parse(localStorage.getItem("formData")) || {};
     
-    const selectedTimeSlot = document.querySelector('.time-slot.selected');
-    if (!selectedTimeSlot) {
-        alert('Please select a time slot');
-        return;
+    // Map form data to input fields
+    if (formData) {
+        // Personal Information
+        if (formData.firstName) document.getElementById('firstName').value = formData.firstName;
+        if (formData.lastName) document.getElementById('lastName').value = formData.lastName;
+        // if (formData.dob) document.getElementById('dob').value = formData.dob;
+        if (formData.gender) {
+            const genderSelect = document.getElementById('gender');
+            const options = Array.from(genderSelect.options).map(option => option);
+            for (const option of options) {
+                if (option.value === formData.gender) {
+                    option.setAttribute('selected'); 
+                    break;
+                }
+            }
+        }
+        if (formData.emergencyContact.phone) document.getElementById('phone').value = formData.emergencyContact.phone;
+        if (localStorage.getItem('EMAIL')) document.getElementById('email').value = localStorage.getItem('EMAIL');
+        if (formData.permanentAddress) document.getElementById('address').value = formData.permanentAddress;
+        
+        // Medical Information
+        // if (formData.symptoms) document.getElementById('symptoms').value = formData.symptoms;
+        // if (formData.previousHistory) document.getElementById('previousHistory').value = formData.previousHistory;
     }
 
-    // Get form values
-    const formData = {
-        hospital: document.getElementById('hospital'),
-        department: document.getElementById('department'),
-        doctor: document.getElementById('doctor'),
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        dob: document.getElementById('dob').value,
-        gender: document.getElementById('gender').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        address: document.getElementById('address').value,
-        symptoms: document.getElementById('symptoms').value,
-        date: document.getElementById('preferredDate').value,
-        timeSlot: selectedTimeSlot.textContent
+    // Save form data to localStorage when form fields change
+    // const formElements = document.querySelectorAll('#ticketForm input, #ticketForm select, #ticketForm textarea');
+    // formElements.forEach(element => {
+    //     element.addEventListener('change', () => {
+    //         const currentFormData = {
+    //             // Appointment Details
+    //             hospital: document.getElementById('hospital').value,
+    //             preferredDate: document.getElementById('preferredDate').value,
+                
+    //             // Personal Information
+    //             firstName: document.getElementById('firstName').value,
+    //             lastName: document.getElementById('lastName').value,
+    //             dob: document.getElementById('dob').value,
+    //             gender: document.getElementById('gender').value,
+    //             phone: document.getElementById('phone').value,
+    //             email: document.getElementById('email').value,
+    //             address: document.getElementById('address').value,
+                
+    //             // Medical Information
+    //             symptoms: document.getElementById('symptoms').value,
+    //             previousHistory: document.getElementById('previousHistory').value
+    //         };
+            
+    //         localStorage.setItem("formData", JSON.stringify(currentFormData));
+    //     });
+    // });
+
+    // Handle ticket generation
+    const handleTicketGeneration = async (formData) => {
+        try {
+            const response = await fetch('/ticket/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save ticket data');
+            }
+
+            const data = await response.json();
+            
+            // Replace page content with generated ticket
+            document.body.innerHTML = `
+                <div class="ticket-view-container">
+                    <div class="ticket-card">
+                        <div class="header">
+                            <h1>Hospital OP Ticket</h1>
+                            <div class="ticket-number">Ticket #${data.ticket_id}</div>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h2>Appointment Details</h2>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Hospital</label>
+                                    <span>${formData.hospital}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Appointment Date</label>
+                                    <span>${new Date(formData.preferredDate).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            
+                            <h2>Personal Information</h2>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Name</label>
+                                    <span>${formData.firstName} ${formData.lastName}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Date of Birth</label>
+                                    <span>${new Date(formData.dob).toLocaleDateString()}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Gender</label>
+                                    <span>${formData.gender}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Phone</label>
+                                    <span>${formData.phone}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Email</label>
+                                    <span>${formData.email}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Address</label>
+                                    <span>${formData.address}</span>
+                                </div>
+                            </div>
+                            
+                            <h2>Medical Information</h2>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Symptoms</label>
+                                    <span>${formData.symptoms}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Previous Medical History</label>
+                                    <span>${formData.previousHistory || 'None'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <div class="timestamp">Generated on: ${new Date().toLocaleString()}</div>
+                            <div class="actions">
+                                <button onclick="window.print()" class="print-btn">Print Ticket</button>
+                                <button onclick="window.location.reload()" class="new-btn">New Ticket</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error generating ticket:', error);
+            alert('Failed to generate ticket. Please try again.');
+        }
     };
 
-    // Get selected conditions
-    const selectedConditions = Array.from(document.querySelectorAll('input[name="conditions"]:checked'))
-        .map(checkbox => checkbox.value)
-        .join(', ');
+    // Handle form submission
+    const ticketForm = document.getElementById('ticketForm');
+    if (ticketForm) {
+        ticketForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            // Collect current form data
+            const formData = {
+                hospital: document.getElementById('hospital').value,
+                preferredDate: document.getElementById('preferredDate').value,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                address: document.getElementById('address').value,
+                symptoms: document.getElementById('symptoms').value,
+                previousHistory: document.getElementById('previousHistory').value
+            };
+
+            const ticketEndpoint = '/ticket/';
+            navigator.geolocation.getCurrentPosition((position) => {
+                fetch(ticketEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken() // Include CSRF token
+                    },
+                    body: JSON.stringify({
+                        symptoms: formData.symptoms,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    })
+                })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Ticket generated:', data);
+            })
+            .catch((error) => {
+                console.error('Error generating ticket:', error);
+            });
+
+            // Generate ticket
+            handleTicketGeneration(formData);
+            });
+        });
+    }
+});
+
+function getCSRFToken() {
+    const cookie = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : null;
 }

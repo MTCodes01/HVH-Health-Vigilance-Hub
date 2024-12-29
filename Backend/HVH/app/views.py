@@ -2,14 +2,42 @@
 
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from .models import UserProfile
-from django.views.decorators.csrf import csrf_exempt
+from .models import User
+from .models import PatientTicket
+from folium.plugins import HeatMap
+from datetime import datetime
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
 import json
 import pandas as pd
+import requests
+import csv
+import joblib
+import folium
+import numpy as np
 
-# Endpoints____________________________________________
+# API keys_____________________________________________
+
+WEATHER_API_KEY = "3443df9e6a3d2df4ae5a38bca00b7619"
+
+# API endpoints________________________________________
+
+weather_base_url = "https://api.openweathermap.org/data/2.5/weather"
+
+# Constants____________________________________________
+
+SYMPTOM_DISEASE_MAP = {
+    "fever": ["Dengue", "Malaria", "Flu", "Covid"],
+    "cough": ["Covid", "Flu"],
+    "rash": ["Dengue", "Measles"],
+    "chills": ["Malaria"],
+}
+
+# Website Endpoints____________________________________
 
 def index(request):
     return render(request, 'index.html')
@@ -47,8 +75,8 @@ def precaution(request):
 def virtualMeet(request):
     return render(request, 'virtual_meet.html')
 
-def ticket(request):
-    return render(request, 'opTicket.html')
+# def ticket(request):
+#     return render(request, 'opTicket.html')
 
 # Authentication_______________________________________
 
@@ -57,23 +85,39 @@ def signup(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print("Data:",data)
             username = data.get('username')
             email = data.get('email')
             password = data.get('password')
+            # first_name = data.get('firstName', '')
+            # last_name = data.get('lastName', '')
+            # age = data.get('age')
+            # gender = data.get('gender')
+            # current_address = data.get('currentAddress')
+            # permanent_address = data.get('permanentAddress')
+            # health_condition = data.get('healthCondition')
+            # emergency_contact = data.get('emergencyContact')
 
             # Check if the username already exists
             if User.objects.filter(username=username).exists():
                 return JsonResponse({"error": "Username already exists."}, status=400)
 
-            # Create a new user
+            # Create the user with the provided details
             user = User.objects.create_user(username=username, email=email, password=password)
 
-            # Create UserProfile instance if UserProfile table exists
-            try:
-                user_profile = UserProfile.objects.get_or_create(user=user)[0]
-                user_profile.save()
-            except Exception as profile_error:
-                print(f"Error creating UserProfile: {profile_error}")
+            # Set additional fields specific to your custom User model
+            # user.first_name = first_name
+            # user.last_name = last_name
+            # user.age = age
+            # user.gender = gender
+            # user.current_address = current_address
+            # user.permanent_address = permanent_address
+            # user.health_condition = health_condition
+            # user.emergency_contact_name = emergency_contact.get("name")
+            # user.emergency_contact_phone = emergency_contact.get("phone")
+            # user.emergency_contact_relation = emergency_contact.get("relation")
+
+            user.save()
 
             return JsonResponse({"success": "User created successfully"}, status=201)
 
@@ -113,33 +157,365 @@ def query(request):
         
         # Save the data to the database
         try:
-            # Create a DataFrame from the data
-            data = {
-                "username": [username],
-                "first_name": [first_name],
-                "last_name": [last_name],
-                "age": [age],
-                "gender": [gender],
-                "current_address": [current_address],
-                "permanent_address": [permanent_address],
-                "health_condition": [health_condition],
-                "emergency_contact_name": [emergency_contact["name"]],
-                "emergency_contact_phone": [emergency_contact["phone"]],
-                "emergency_contact_relation": [emergency_contact["relation"]]
-            }
-            df = pd.DataFrame(data)
+            # Retrieve the user instance
+            user = User.objects.get(username=username)
 
-            # Save the DataFrame to user's profile
-            try:
-                user = User.objects.get(username=username)
-                user_profile = UserProfile.objects.get(user=user)
-                user_profile.data = df.to_csv(index=False)
-                user_profile.save()
-            except User.DoesNotExist:
-                return JsonResponse({"error": "User does not exist"}, status=404)
+            # Update the User model with the provided data
+            user.first_name = first_name
+            user.last_name = last_name
+            user.age = age
+            user.gender = gender
+            user.current_address = current_address
+            user.permanent_address = permanent_address
+            user.health_condition = health_condition
+            user.emergency_contact_name = emergency_contact.get("name")
+            user.emergency_contact_phone = emergency_contact.get("phone")
+            user.emergency_contact_relation = emergency_contact.get("relation")
+            user.save()
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User does not exist"}, status=404)
         except Exception as e:
             print(f"Error saving query data: {e}")
             return JsonResponse({"error": "An error occurred while saving the query data."}, status=500)
+
         return JsonResponse({"success": "Query submitted successfully"}, status=200)
+
     return render(request, 'query.html')
-  
+
+# Weather related methods______________________________
+
+def fetch_weather_data(lat, lon, api_key):
+    url = f"{weather_base_url}?lat={lat}&lon={lon}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    # print(f"Response: {response.json()}")
+    if response.status_code == 200:
+        data = response.json()
+        # print(f"Data: {data}")
+        return {
+            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Latitude": lat,
+            "Longitude": lon,
+            "Temperature": data['main']['temp'],
+            "Rainfall": data.get('rain', {}).get('1h', 0.0),
+            "Humidity": data['main']['humidity'],
+        }
+    else:
+        print(f"Error fetching weather data: {response.json()}")
+        return None
+
+def fetch_weather_for_location(request):
+    """
+    Django view to fetch weather data for a given location (latitude and longitude).
+    """
+    if request.method == 'GET':
+        try:
+            # Retrieve latitude and longitude from GET parameters
+            lat = request.GET.get('lat')
+            lon = request.GET.get('lon')
+
+            if not lat or not lon:
+                return JsonResponse({"error": "Latitude and longitude are required."}, status=400)
+
+            # Call the weather API
+            url = f"{weather_base_url}?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}&units=metric"
+            response = requests.get(url)
+            
+            if response.status_code == 200:
+                data = response.json()
+                weather_data = {
+                    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "Latitude": lat,
+                    "Longitude": lon,
+                    "Temperature": data['main']['temp'],
+                    "Rainfall": data.get('rain', {}).get('1h', 0.0),
+                    "Humidity": data['main']['humidity'],
+                }
+                return JsonResponse({"weather_data": weather_data}, status=200)
+            else:
+                return JsonResponse(
+                    {"error": f"Error fetching weather data: {response.json().get('message', 'Unknown error')}"},
+                    status=response.status_code
+                )
+
+        except Exception as e:
+            print(f"Error fetching weather data: {e}")
+            return JsonResponse({"error": "An internal server error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid HTTP method. Use GET."}, status=405)
+    
+# Disease prediction methods___________________________
+
+model = joblib.load("Backend/HVH/app/static/disease_predictor_model.pkl")
+# Function to predict disease
+def predict_disease(temp, humidity, density, lat, lon, rainfall, symptoms):
+    possible_diseases = set()
+    for symptom in symptoms:
+        possible_diseases.update(SYMPTOM_DISEASE_MAP.get(symptom.lower(), []))
+
+    input_data = np.array([[temp, humidity, density, lat, lon, rainfall]])
+    prediction = model.predict(input_data)
+    disease_mapping = {index: category for index, category in enumerate(['Dengue', 'Malaria', 'Flu', 'Covid'])}
+    predicted_disease = disease_mapping[prediction[0]]
+
+    if predicted_disease in possible_diseases:
+        return predicted_disease
+    return "Unknown"
+
+# Function to generate heatmap
+def generate_heatmap(location, predicted_disease, estimated_days):
+    m = folium.Map(location=location, zoom_start=10)
+    for day in range(1, estimated_days + 1):
+        radius = day * 10  # Increase radius per day
+        HeatMap([[location[0], location[1], radius]]).add_to(m)
+    heatmap_file = f"heatmap_{predicted_disease}.html"
+    m.save(f"Backend/HVH/app/templates/{heatmap_file}")
+    print(f"Heatmap saved as {f"Backend/HVH/app/templates/{heatmap_file}"}")
+
+# New method to generate heatmap when POST
+def generate_heatmap_post(request):
+    if request.method == 'POST':
+        try:
+            # Parse the input JSON data
+            data = json.loads(request.body)
+            location = (data.get('latitude'), data.get('longitude'))
+            predicted_disease = data.get('predicted_disease')
+            estimated_days = data.get('estimated_days')
+
+            # Validate inputs
+            if not location or not predicted_disease or not estimated_days:
+                return JsonResponse({"error": "Location, predicted disease, and estimated days are required."}, status=400)
+
+            # Generate the heatmap
+            generate_heatmap(location, predicted_disease, estimated_days)
+
+            return JsonResponse({"success": "Heatmap generated successfully"}, status=200)
+        except Exception as e:
+            print(f"Error generating heatmap: {e}")
+            return JsonResponse({"error": "An internal server error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid HTTP method. Use POST."}, status=405)
+
+# Main Function
+def predict_disease_view(request):
+    """
+    Django view to predict disease based on symptoms, location, and weather data.
+    """
+    if request.method == 'POST':
+        try:
+            # Parse the input JSON data
+            data = json.loads(request.body)
+            symptoms = data.get('symptoms', [])
+            lat = data.get('latitude')
+            lon = data.get('longitude')
+            estimated_days = data.get('estimated_days', 1)
+
+            # Validate inputs
+            if not symptoms or not lat or not lon:
+                return JsonResponse({"error": "Symptoms, latitude, and longitude are required."}, status=400)
+
+            # Fetch weather data
+            weather_data = fetch_weather_for_location(request)  # Call the helper function
+            if 'weather_data' not in weather_data:
+                return JsonResponse({"error": "Failed to fetch weather data."}, status=500)
+            weather_data = weather_data['weather_data']
+
+            # Placeholder for density
+            density = 5000  # Replace with actual logic or data
+
+            # Predict disease
+            predicted_disease = predict_disease(
+                weather_data['Temperature'],
+                weather_data['Humidity'],
+                density,
+                lat,
+                lon,
+                weather_data['Rainfall'],
+                symptoms
+            )
+
+            # Generate heatmap
+            location = [float(lat), float(lon)]
+            heatmap_path = generate_heatmap(location, predicted_disease, estimated_days)
+
+            return JsonResponse({
+                "predicted_disease": predicted_disease,
+                "heatmap": heatmap_path
+            }, status=200)
+
+        except Exception as e:
+            print(f"Error in disease prediction: {e}")
+            return JsonResponse({"error": "An error occurred during disease prediction."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid HTTP method. Use POST."}, status=405)
+
+# Train the model_______________________________________
+
+def train(request):
+    # Load the disease dataset
+    weather_df = pd.read_csv("time_series_disease_data.csv")
+
+    # Add new features if missing
+    weather_df['Rainfall'] = weather_df.get('Rainfall', 0)
+
+    # Prepare Features (X) and Target (y)
+    X = weather_df[['Temperature', 'Humidity', 'Population Density', 'Latitude', 'Longitude', 'Rainfall']]
+    y = weather_df['Disease']
+
+    # Encode 'Disease' into numeric labels
+    y = y.astype("category").cat.codes
+
+    # Train-Test Split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Train the Random Forest Model
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Evaluate the Model
+    y_pred = model.predict(X_test)
+    print("\nAccuracy:", accuracy_score(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+    # Save the Model
+    joblib.dump(model, "Backend/HVH/app/templates/disease_predictor_model.pkl")
+    print("\nModel saved as 'Backend/HVH/app/templates/disease_predictor_model.pkl'")
+    
+# Ticket Data Handling__________________________________
+# @csrf_exempt
+# def ticket_handler(request):
+#     if request.method == "POST":
+#         try:
+#             # Parse the incoming JSON data
+#             data = json.loads(request.body)
+            
+#             # Convert date string to datetime object
+#             dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
+            
+#             # Create new ticket
+#             ticket = PatientTicket.objects.create(
+#                 firstName=data['firstName'],
+#                 lastName=data['lastName'],
+#                 dob=dob,
+#                 gender=data['gender'],
+#                 phone=data['phone'],
+#                 email=data['email'],
+#                 address=data['address']
+#             )
+
+#             # Predict the disease
+#             symptoms = data.get('symptoms', [])
+#             lat = data.get('latitude')
+#             lon = data.get('longitude')
+#             weather_data = fetch_weather_for_location(request)
+
+#             if 'weather_data' not in weather_data:
+#                 return JsonResponse({"error": "Failed to fetch weather data."}, status=500)
+            
+#             weather_data = weather_data['weather_data']
+#             density = 5000  # Placeholder for density, replace with actual logic or data
+            
+#             predicted_disease = predict_disease(
+#                 weather_data['Temperature'],
+#                 weather_data['Humidity'],
+#                 density,
+#                 lat,
+#                 lon,
+#                 weather_data['Rainfall'],
+#                 symptoms
+#             )
+
+#             # Generate heatmap
+#             location = [float(lat), float(lon)]
+#             generate_heatmap(location, predicted_disease, 1)
+
+#             return JsonResponse({
+#                 'status': 'success',
+#                 'message': 'Ticket created and disease predicted successfully',
+#                 'ticket_id': ticket.id,
+#                 'predicted_disease': predicted_disease
+#             })
+            
+#         except KeyError as e:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': f'Missing required field: {str(e)}'
+#             }, status=400)
+            
+#         except ValueError as e:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': f'Invalid data format: {str(e)}'
+#             }, status=400)
+            
+#         except Exception as e:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': f'Server error: {str(e)}'
+#             }, status=500)
+    
+#     return render(request, 'opTicket.html')
+
+@csrf_exempt
+def ticket(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            symptoms = data.get('symptoms', [])
+            lat = data.get('latitude')
+            lon = data.get('longitude')
+
+            if not lat or not lon or not symptoms:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Latitude, longitude, and symptoms are required."
+                }, status=400)
+
+            # Fetch weather data
+            try:
+                weather_data = fetch_weather_data(lat, lon, WEATHER_API_KEY)
+                print(f"weather_response: {weather_data}")
+                # weather_data = weather_response.get('weather_data', {})
+                if not weather_data:
+                    raise ValueError("Missing 'weather_data' in response.")
+            except Exception as e:
+                print(f"Error fetching weather data: {e}")
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Failed to fetch weather data."
+                }, status=500)
+
+            # Predict disease
+            predicted_disease = predict_disease(
+                weather_data['Temperature'],
+                weather_data['Humidity'],
+                5000,
+                lat,
+                lon,
+                weather_data['Rainfall'],
+                symptoms
+            )
+
+            # Generate heatmap
+            location = [float(lat), float(lon)]
+            heatmap_path = generate_heatmap(location, predicted_disease, 1)
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Disease predicted and heatmap generated successfully',
+                'predicted_disease': predicted_disease,
+                'heatmap': heatmap_path
+            })
+        except KeyError as e:
+            return JsonResponse({
+                "status": "error",
+                "message": f"Missing key: {e}"
+            }, status=400)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                "status": "error",
+                "message": "An error occurred during disease prediction."
+            }, status=500)
+
+    return render(request, 'opTicket.html')
