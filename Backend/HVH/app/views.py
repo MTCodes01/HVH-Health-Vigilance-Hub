@@ -182,15 +182,11 @@ def query(request):
 
     return render(request, 'query.html')
 
-# Weather related methods______________________________
-
 def fetch_weather_data(lat, lon, api_key):
     url = f"{weather_base_url}?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     response = requests.get(url)
-    # print(f"Response: {response.json()}")
     if response.status_code == 200:
         data = response.json()
-        # print(f"Data: {data}")
         return {
             "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "Latitude": lat,
@@ -203,183 +199,107 @@ def fetch_weather_data(lat, lon, api_key):
         print(f"Error fetching weather data: {response.json()}")
         return None
 
+from django.http import JsonResponse
+
 def fetch_weather_for_location(request):
-    """
-    Django view to fetch weather data for a given location (latitude and longitude).
-    """
     if request.method == 'GET':
         try:
-            # Retrieve latitude and longitude from GET parameters
             lat = request.GET.get('lat')
             lon = request.GET.get('lon')
 
             if not lat or not lon:
                 return JsonResponse({"error": "Latitude and longitude are required."}, status=400)
 
-            # Call the weather API
-            url = f"{weather_base_url}?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}&units=metric"
-            response = requests.get(url)
-            
-            if response.status_code == 200:
-                data = response.json()
-                weather_data = {
-                    "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "Latitude": lat,
-                    "Longitude": lon,
-                    "Temperature": data['main']['temp'],
-                    "Rainfall": data.get('rain', {}).get('1h', 0.0),
-                    "Humidity": data['main']['humidity'],
-                }
+            # Fetch weather data
+            weather_data = fetch_weather_data(lat, lon, WEATHER_API_KEY)
+
+            if weather_data:
                 return JsonResponse({"weather_data": weather_data}, status=200)
             else:
-                return JsonResponse(
-                    {"error": f"Error fetching weather data: {response.json().get('message', 'Unknown error')}"},
-                    status=response.status_code
-                )
+                return JsonResponse({"error": "Failed to fetch weather data."}, status=500)
 
         except Exception as e:
             print(f"Error fetching weather data: {e}")
             return JsonResponse({"error": "An internal server error occurred."}, status=500)
     else:
         return JsonResponse({"error": "Invalid HTTP method. Use GET."}, status=405)
-    
-# Disease prediction methods___________________________
 
-model = joblib.load("Backend/HVH/app/static/disease_predictor_model.pkl")
-# Function to predict disease
-def predict_disease(temp, humidity, density, lat, lon, rainfall, symptoms):
-    possible_diseases = set()
-    for symptom in symptoms:
-        possible_diseases.update(SYMPTOM_DISEASE_MAP.get(symptom.lower(), []))
+def predict_disease_view(data):
+    try:
+        symptoms = data.get('symptoms', [])
+        lat = data.get('latitude')
+        lon = data.get('longitude')
+        estimated_days = data.get('estimated_days', 1)
 
-    input_data = np.array([[temp, humidity, density, lat, lon, rainfall]])
-    prediction = model.predict(input_data)
-    disease_mapping = {index: category for index, category in enumerate(['Dengue', 'Malaria', 'Flu', 'Covid'])}
-    predicted_disease = disease_mapping[prediction[0]]
+        if not symptoms or not lat or not lon:
+            return {"error": "Symptoms, latitude, and longitude are required."}
 
-    if predicted_disease in possible_diseases:
-        return predicted_disease
-    return "Unknown"
+        # Fetch weather data
+        weather_data = fetch_weather_data(lat, lon, WEATHER_API_KEY)
+        if not weather_data:
+            return {"error": "Failed to fetch weather data."}
 
-# Function to generate heatmap
+        # Placeholder for density
+        density = 5000  # Replace with actual logic or data
+
+        # Predict disease
+        predicted_disease = predict_disease_view({
+            weather_data['Temperature'],
+            weather_data['Humidity'],
+            density,
+            lat,
+            lon,
+            weather_data['Rainfall'],
+            symptoms
+        })
+
+        # Generate heatmap
+        location = [float(lat), float(lon)]
+        heatmap_path = generate_heatmap(location, predicted_disease, estimated_days)
+
+        return {
+            "predicted_disease": predicted_disease,
+            "heatmap_path": heatmap_path
+        }
+
+    except Exception as e:
+        print(f"Error in disease prediction: {e}")
+        return {"error": "An error occurred during disease prediction."}
+
 def generate_heatmap(location, predicted_disease, estimated_days):
     m = folium.Map(location=location, zoom_start=10)
     for day in range(1, estimated_days + 1):
         radius = day * 10  # Increase radius per day
         HeatMap([[location[0], location[1], radius]]).add_to(m)
+
+    # Create heatmap file path
     heatmap_file = f"heatmap_{predicted_disease}.html"
-    m.save(f"Backend/HVH/app/templates/{heatmap_file}")
-    print(f"Heatmap saved as {f"Backend/HVH/app/templates/{heatmap_file}"}")
-
-# New method to generate heatmap when POST
-def generate_heatmap_post(request):
-    if request.method == 'POST':
-        try:
-            # Parse the input JSON data
-            data = json.loads(request.body)
-            location = (data.get('latitude'), data.get('longitude'))
-            predicted_disease = data.get('predicted_disease')
-            estimated_days = data.get('estimated_days')
-
-            # Validate inputs
-            if not location or not predicted_disease or not estimated_days:
-                return JsonResponse({"error": "Location, predicted disease, and estimated days are required."}, status=400)
-
-            # Generate the heatmap
-            generate_heatmap(location, predicted_disease, estimated_days)
-
-            return JsonResponse({"success": "Heatmap generated successfully"}, status=200)
-        except Exception as e:
-            print(f"Error generating heatmap: {e}")
-            return JsonResponse({"error": "An internal server error occurred."}, status=500)
-    else:
-        return JsonResponse({"error": "Invalid HTTP method. Use POST."}, status=405)
-
-# Main Function
-def predict_disease_view(request):
-    """
-    Django view to predict disease based on symptoms, location, and weather data.
-    """
-    if request.method == 'POST':
-        try:
-            # Parse the input JSON data
-            data = json.loads(request.body)
-            symptoms = data.get('symptoms', [])
-            lat = data.get('latitude')
-            lon = data.get('longitude')
-            estimated_days = data.get('estimated_days', 1)
-
-            # Validate inputs
-            if not symptoms or not lat or not lon:
-                return JsonResponse({"error": "Symptoms, latitude, and longitude are required."}, status=400)
-
-            # Fetch weather data
-            weather_data = fetch_weather_for_location(request)  # Call the helper function
-            if 'weather_data' not in weather_data:
-                return JsonResponse({"error": "Failed to fetch weather data."}, status=500)
-            weather_data = weather_data['weather_data']
-
-            # Placeholder for density
-            density = 5000  # Replace with actual logic or data
-
-            # Predict disease
-            predicted_disease = predict_disease(
-                weather_data['Temperature'],
-                weather_data['Humidity'],
-                density,
-                lat,
-                lon,
-                weather_data['Rainfall'],
-                symptoms
-            )
-
-            # Generate heatmap
-            location = [float(lat), float(lon)]
-            heatmap_path = generate_heatmap(location, predicted_disease, estimated_days)
-
-            return JsonResponse({
-                "predicted_disease": predicted_disease,
-                "heatmap": heatmap_path
-            }, status=200)
-
-        except Exception as e:
-            print(f"Error in disease prediction: {e}")
-            return JsonResponse({"error": "An error occurred during disease prediction."}, status=500)
-    else:
-        return JsonResponse({"error": "Invalid HTTP method. Use POST."}, status=405)
-
-# Train the model_______________________________________
+    heatmap_file_path = f"C:/Users/USER/OneDrive/Documents/vscode/HVH-Health-Vigilance-Hub/Backend/HVH/app/templates/{heatmap_file}"
+    m.save(heatmap_file_path)
+    
+    print(f"Heatmap saved as {heatmap_file_path}")
+    return heatmap_file_path
 
 def train(request):
-    # Load the disease dataset
     weather_df = pd.read_csv("time_series_disease_data.csv")
-
-    # Add new features if missing
     weather_df['Rainfall'] = weather_df.get('Rainfall', 0)
 
-    # Prepare Features (X) and Target (y)
     X = weather_df[['Temperature', 'Humidity', 'Population Density', 'Latitude', 'Longitude', 'Rainfall']]
     y = weather_df['Disease']
-
-    # Encode 'Disease' into numeric labels
     y = y.astype("category").cat.codes
 
-    # Train-Test Split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Train the Random Forest Model
+    
     model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X_train, y_train)
 
-    # Evaluate the Model
     y_pred = model.predict(X_test)
     print("\nAccuracy:", accuracy_score(y_test, y_pred))
     print("\nClassification Report:\n", classification_report(y_test, y_pred))
 
-    # Save the Model
-    joblib.dump(model, "Backend/HVH/app/templates/disease_predictor_model.pkl")
-    print("\nModel saved as 'Backend/HVH/app/templates/disease_predictor_model.pkl'")
-    
+    joblib.dump(model, "path/to/save/disease_predictor_model.pkl")
+    print("\nModel saved successfully.")
+
 # Ticket Data Handling__________________________________
 # @csrf_exempt
 # def ticket_handler(request):
@@ -485,7 +405,7 @@ def ticket(request):
                 }, status=500)
 
             # Predict disease
-            predicted_disease = predict_disease(
+            predicted_disease = predict_disease_view({
                 weather_data['Temperature'],
                 weather_data['Humidity'],
                 5000,
@@ -493,7 +413,7 @@ def ticket(request):
                 lon,
                 weather_data['Rainfall'],
                 symptoms
-            )
+            })
 
             # Generate heatmap
             location = [float(lat), float(lon)]
