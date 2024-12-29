@@ -5,6 +5,7 @@ This web application is an innovative solution designed to predict disease outbr
 
 In addition to outbreak prediction, the platform integrates several essential healthcare services, creating a one-stop solution for users to manage their health effectively while contributing to the broader goal of disease surveillance.
 
+
 ## Key Features  
 ### 1. **Disease Outbreak Prediction**  
    - **Heatmaps:** The platform uses AI to create visual heatmaps showing the geographical spread of diseases based on user inputs.  
@@ -31,6 +32,7 @@ In addition to outbreak prediction, the platform integrates several essential he
    - Provides location-specific alerts about ongoing disease outbreaks.  
    - Offers precautionary guidelines to minimize health risks.
 
+
 ## Why Choose This Platform?  
 ### 1. **Comprehensive Features in One Platform**  
    Unlike other solutions that focus solely on outbreak prediction or healthcare services, this platform combines the two, creating a symbiotic relationship where user data helps train the AI while users benefit from streamlined healthcare access.  
@@ -52,6 +54,7 @@ In addition to outbreak prediction, the platform integrates several essential he
    - Most outbreak prediction tools focus on large-scale epidemiological data, often ignoring individual user contributions. This platform democratizes disease surveillance by enabling users to participate directly.  
    - Integrates healthcare services and disease prediction, offering more value than standalone healthcare apps or disease tracking platforms.
 
+
 ## Tech Stack  
 ### 1. **Frontend:**  
    - **HTML & CSS:** For building responsive and user-friendly interfaces.  
@@ -68,5 +71,3 @@ In addition to outbreak prediction, the platform integrates several essential he
    - **Django ORM:** Efficiently manages and queries the database to store user data, health records, and AI model inputs/outputs.  
 
 ---
-
-Feel free to contribute to this transformative project or provide feedback to help us improve further. Let us know if you have suggestions for additional features or enhancements!
