@@ -1,0 +1,4 @@
+Date,Latitude,Longitude,Temperature,Rainfall,Humidity,Population,Population Density,Location,Disease,Country/Region,cases,Predicted Disease
+17-07-2021 00:06:47,22.2855,114.1577,13.76,0.0,44,11077,7.05,Hong Kong,Covid,China,1101224,Covid
+17-07-2021 00:06:48,-21.1004,55.6021,21.58,0.0,83,0,0.0,Reunion,Covid,France,360445,Covid
+17-07-2021 00:06:50,18.2167,-63.05,28.2,0.0,57,0,0.0,Anguilla,Covid,United Kingdom,3904,Covid

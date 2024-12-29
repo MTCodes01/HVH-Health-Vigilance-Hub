@@ -18,8 +18,11 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
     if (response.ok) {
         console.log(result);
+        if (localStorage.getItem('formData')) localStorage.removeItem('formData');
+        if (localStorage.getItem('QUERY_SUBMITTED')) localStorage.removeItem('QUERY_SUBMITTED');
         localStorage.setItem('LOGGED_IN', 'true');
         localStorage.setItem('USERNAME', username);
+        localStorage.setItem('EMAIL', email);
         window.location.href = '/query/';
     } else {
         alert(result.error || 'An error occurred.');

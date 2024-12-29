@@ -173,6 +173,7 @@ async function submitForm() {
     if (response.ok) {
         console.log(result);
         localStorage.setItem('QUERY_SUBMITTED', 'true');
+        localStorage.setItem('formData', JSON.stringify(formData));
         setTimeout(() => {
             window.location.href = '/home/';
         }, 3000);
