@@ -1,6 +1,6 @@
-Date,Latitude,Longitude,Temperature,Rainfall,Humidity,Population,Population Density,Location
-2024-12-29 01:12:36,22.2855,114.1577,14.16,0.0,44,11077,7.05,Hong Kong
-2024-12-29 01:12:36,-21.1004,55.6021,21.34,0.0,83,0,0.0,Reunion
-2024-12-29 01:12:37,19.0144,72.8479,24.99,0.0,61,0,0.0,Mumbai
-2024-12-29 01:12:38,28.6667,77.2167,14.05,0.0,100,0,0.0,Delhi
-2024-12-29 01:12:38,18.2167,-63.05,27.02,0.0,69,0,0.0,Anguilla
+Date,Latitude,Longitude,Temperature,Rainfall,Humidity,Population,Population Density,Location,Disease
+2024-12-29 01:12:36,22.2855,114.1577,14.16,0.0,44,11077,7.05,Hong Kong,Covid
+2024-12-29 01:12:36,-21.1004,55.6021,21.34,0.0,83,0,0.0,Reunion,Covid
+2024-12-29 01:12:37,19.0144,72.8479,24.99,0.0,61,0,0.0,Mumbai,Covid
+2024-12-29 01:12:38,28.6667,77.2167,14.05,0.0,100,0,0.0,Delhi,Covid
+2024-12-29 01:12:38,18.2167,-63.05,27.02,0.0,69,0,0.0,Anguilla,Covid
