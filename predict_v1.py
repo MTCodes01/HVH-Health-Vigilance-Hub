@@ -15,27 +15,45 @@ SYMPTOM_DISEASE_MAP = {
 # Load the trained model
 model = joblib.load("disease_predictor_model.pkl")
 
-# Function to predict disease
-def predict_disease(temp, humidity, density, lat, lon, rainfall, symptoms):
+# Function to predict disease and spread data
+def predict_disease_and_spread(temp, humidity, density, lat, lon, rainfall, symptoms):
+    # Identify possible diseases from symptoms
     possible_diseases = set()
     for symptom in symptoms:
         possible_diseases.update(SYMPTOM_DISEASE_MAP.get(symptom.lower(), []))
 
+    # Prepare input data
     input_data = np.array([[temp, humidity, density, lat, lon, rainfall]])
-    prediction = model.predict(input_data)
+    
+    # Get predictions
+    prediction_probabilities = model.predict_proba(input_data)[0]
     disease_mapping = {index: category for index, category in enumerate(['Dengue', 'Malaria', 'Flu', 'Covid'])}
-    predicted_disease = disease_mapping[prediction[0]]
+    
+    # Map prediction probabilities to diseases
+    disease_spread = {}
+    for index, probability in enumerate(prediction_probabilities):
+        disease_name = disease_mapping[index]
+        if disease_name in possible_diseases:
+            disease_spread[disease_name] = probability
 
-    if predicted_disease in possible_diseases:
-        return predicted_disease
-    return "Unknown"
+    # Select the most probable disease
+    predicted_disease = max(disease_spread, key=disease_spread.get) if disease_spread else "Unknown"
+    return predicted_disease, disease_spread
 
-# Function to generate heatmap
-def generate_heatmap(location, predicted_disease, estimated_days):
+# Function to generate heatmap based on prediction probabilities
+def generate_heatmap(location, predicted_disease, spread_data, estimated_days):
     m = folium.Map(location=location, zoom_start=10)
+    
+    # Generate heatmap points based on spread probabilities
     for day in range(1, estimated_days + 1):
-        radius = day * 10  # Increase radius per day
-        HeatMap([[location[0], location[1], radius]]).add_to(m)
+        weight_factor = day / estimated_days  # Adjust weight over time
+        points = [
+            [location[0] + np.random.uniform(-0.01, 0.01),  # Slight random variation in latitude
+             location[1] + np.random.uniform(-0.01, 0.01),  # Slight random variation in longitude
+             spread_data[predicted_disease] * weight_factor]
+        ]
+        HeatMap(points, radius=15, blur=10).add_to(m)
+
     heatmap_file = f"heatmap_{predicted_disease}.html"
     m.save(heatmap_file)
     print(f"Heatmap saved as {heatmap_file}")
@@ -55,11 +73,21 @@ def main():
         return
 
     density = 5000  # Placeholder for population density; replace with actual data or logic
-    predicted_disease = predict_disease(
+
+    # Predict disease and spread data
+    predicted_disease, spread_data = predict_disease_and_spread(
         weather_data['Temperature'], weather_data['Humidity'], density, lat, lon, weather_data['Rainfall'], symptoms
     )
+
+    if predicted_disease == "Unknown":
+        print("Could not determine the disease based on the input symptoms.")
+        return
+
     print(f"Predicted Disease: {predicted_disease}")
-    generate_heatmap([lat, lon], predicted_disease, estimated_days)
+    print(f"Spread Data: {spread_data}")
+    
+    # Generate the heatmap
+    generate_heatmap([lat, lon], predicted_disease, spread_data, estimated_days)
 
 if __name__ == "__main__":
     main()
